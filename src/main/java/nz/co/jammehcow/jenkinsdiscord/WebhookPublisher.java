@@ -139,8 +139,9 @@ public class WebhookPublisher extends Notifier {
         try {
             listener.getLogger().println("Sending notification to Discord.");
             wh.send();
+        } catch (WebhookException e) {
+            e.printStackTrace(listener.getLogger());
         }
-        catch (WebhookException e) { e.printStackTrace(); }
 
         return true;
     }
