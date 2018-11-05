@@ -69,6 +69,14 @@ public class WebhookPublisher extends Notifier {
     	final EnvVars env = build.getEnvironment(listener);
     	// The global configuration, used to fetch the instance url
         JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
+        if (globalConfig == null) {
+            listener.getLogger().println("[Discord Notifier] JenkinsLocationConfiguration is null!");
+            return true;
+        }
+        if (build.getResult() == null) {
+            listener.getLogger().println("[Discord Notifier] build.getResult() is null!");
+            return true;
+        }
 
         // Create a new webhook payload
         DiscordWebhook wh = new DiscordWebhook(env.expand(this.webhookURL));
