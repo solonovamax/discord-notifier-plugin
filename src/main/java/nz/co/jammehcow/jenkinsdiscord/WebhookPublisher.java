@@ -86,7 +86,7 @@ public class WebhookPublisher extends Notifier {
         }
 
         if (this.sendOnStateChange) {
-            if (build.getResult().equals(build.getPreviousBuild().getResult())) {
+            if (build.getPreviousBuild() != null && build.getResult().equals(build.getPreviousBuild().getResult())) {
                 // Stops the webhook payload being created if the status is the same as the previous
                 return true;
             }
@@ -136,7 +136,10 @@ public class WebhookPublisher extends Notifier {
 
         if (this.enableFooterInfo) wh.setFooter("Jenkins v" + build.getHudsonVersion() + ", " + getDescriptor().getDisplayName() + " v" + getDescriptor().getVersion());
 
-        try { wh.send(); }
+        try {
+            listener.getLogger().println("Sending notification to Discord.");
+            wh.send();
+        }
         catch (WebhookException e) { e.printStackTrace(); }
 
         return true;
