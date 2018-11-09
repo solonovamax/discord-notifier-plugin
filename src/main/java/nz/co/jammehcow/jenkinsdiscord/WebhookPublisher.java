@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixConfiguration;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -20,6 +21,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Author: jammehcow.
@@ -109,20 +111,27 @@ public class WebhookPublisher extends Notifier {
         if (buildresult.isWorseThan(Result.SUCCESS)) statusColor = DiscordWebhook.StatusColor.YELLOW;
         if (buildresult.isWorseThan(Result.UNSTABLE)) statusColor = DiscordWebhook.StatusColor.RED;
 
+        String combinationString = "";
         if (!this.statusTitle.isEmpty()) {
             wh.setTitle(env.expand(this.statusTitle));
         } else {
-            wh.setTitle(build.getProject().getDisplayName() + " #" + build.getId());
+            if (build.getProject() instanceof MatrixConfiguration) {
+                MatrixConfiguration project = (MatrixConfiguration) build.getProject();
+                wh.setTitle(project.getParent().getDisplayName() + " #" + build.getId());
+                combinationString += "**Configuration matrix:**\n";
+                for (Map.Entry e : project.getCombination().entrySet())
+                    combinationString += " - " + e.getKey() + ": " + e.getValue() + "\n";
+            } else {
+                wh.setTitle(build.getProject().getDisplayName() + " #" + build.getId());
+            }
         }
-
-
-        String descriptionPrefix;
 
         String branchNameString ="";
         if (!branchName.isEmpty()) {
             branchNameString = "**Branch:** "+env.expand(branchName)+"\n";
         }
 
+        String descriptionPrefix;
         // Adds links to the description and title if enableUrlLinking is enabled
         if (this.enableUrlLinking) {
             String url = globalConfig.getUrl() + build.getUrl();
@@ -130,15 +139,16 @@ public class WebhookPublisher extends Notifier {
                     + "**Build:** "
                     + getMarkdownHyperlink(build.getId(), url)
                     + "\n**Status:** "
-                    + getMarkdownHyperlink(build.getResult().toString().toLowerCase(), url);
+                    + getMarkdownHyperlink(build.getResult().toString().toLowerCase(), url) + "\n";
             wh.setURL(url);
         } else {
             descriptionPrefix = branchNameString
                     + "**Build:** "
                     + build.getId()
                     + "\n**Status:** "
-                    + build.getResult().toString().toLowerCase();
+                    + build.getResult().toString().toLowerCase() + "\n";
         }
+        descriptionPrefix += combinationString;
 
         wh.setThumbnail(thumbnailURL);
         wh.setDescription(new EmbedDescription(build, globalConfig, descriptionPrefix, this.enableArtifactList).toString());
