@@ -111,16 +111,16 @@ public class WebhookPublisher extends Notifier {
         if (buildresult.isWorseThan(Result.SUCCESS)) statusColor = DiscordWebhook.StatusColor.YELLOW;
         if (buildresult.isWorseThan(Result.UNSTABLE)) statusColor = DiscordWebhook.StatusColor.RED;
 
-        String combinationString = "";
+        StringBuilder combinationString = new StringBuilder();
         if (!this.statusTitle.isEmpty()) {
             wh.setTitle(env.expand(this.statusTitle));
         } else {
             if (build.getProject() instanceof MatrixConfiguration) {
                 MatrixConfiguration project = (MatrixConfiguration) build.getProject();
                 wh.setTitle(project.getParent().getDisplayName() + " #" + build.getId());
-                combinationString += "**Configuration matrix:**\n";
+                combinationString.append("**Configuration matrix:**\n");
                 for (Map.Entry e : project.getCombination().entrySet())
-                    combinationString += " - " + e.getKey() + ": " + e.getValue() + "\n";
+                    combinationString.append(" - ").append(e.getKey()).append(": ").append(e.getValue()).append("\n");
             } else {
                 wh.setTitle(build.getProject().getDisplayName() + " #" + build.getId());
             }
