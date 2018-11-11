@@ -5,10 +5,7 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -111,19 +108,20 @@ public class WebhookPublisher extends Notifier {
         if (buildresult.isWorseThan(Result.SUCCESS)) statusColor = DiscordWebhook.StatusColor.YELLOW;
         if (buildresult.isWorseThan(Result.UNSTABLE)) statusColor = DiscordWebhook.StatusColor.RED;
 
+        Project project = (Project) build.getProject();
         StringBuilder combinationString = new StringBuilder();
         if (!this.statusTitle.isEmpty()) {
             wh.setTitle(env.expand(this.statusTitle));
         } else {
-            if (build.getProject() instanceof MatrixConfiguration) {
-                MatrixConfiguration project = (MatrixConfiguration) build.getProject();
-                wh.setTitle(project.getParent().getDisplayName() + " #" + build.getId());
-                combinationString.append("**Configuration matrix:**\n");
-                for (Map.Entry e : project.getCombination().entrySet())
-                    combinationString.append(" - ").append(e.getKey()).append(": ").append(e.getValue()).append("\n");
-            } else {
-                wh.setTitle(build.getProject().getDisplayName() + " #" + build.getId());
-            }
+            wh.setTitle(project.getDisplayName() + " #" + build.getId());
+        }
+
+        //Check if MatrixConfiguration
+        if (project instanceof MatrixConfiguration) {
+            wh.setTitle(project.getParent().getDisplayName() + " #" + build.getId());
+            combinationString.append("**Configuration matrix:**\n");
+            for (Map.Entry e : ((MatrixConfiguration) project).getCombination().entrySet())
+                combinationString.append(" - ").append(e.getKey()).append(": ").append(e.getValue()).append("\n");
         }
 
         String branchNameString ="";
