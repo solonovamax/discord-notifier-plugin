@@ -69,7 +69,6 @@ Discord Notifier supports Jenkins Pipeline. The only required parameter is webho
 ### Example
 
 ````
-pipeline {
 
 discordSend description: 'Jenkins Pipeline Build', footer: 'Footer Text', link: env.BUILD_URL, result: currentBuild.currentResult, title: JOB_NAME, webhookURL: 'Webhook URL'
 
