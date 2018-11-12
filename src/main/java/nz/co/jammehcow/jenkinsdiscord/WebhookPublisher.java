@@ -35,7 +35,7 @@ public class WebhookPublisher extends Notifier {
     private final boolean enableArtifactList;
     private final boolean enableFooterInfo;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.1";
+    private static final String VERSION = "1.4.2";
 
     @DataBoundConstructor
     public WebhookPublisher(String webhookURL, String thumbnailURL, boolean sendOnStateChange, String statusTitle, String branchName, boolean enableUrlLinking, boolean enableArtifactList, boolean enableFooterInfo) {
@@ -64,6 +64,7 @@ public class WebhookPublisher extends Notifier {
     @Override
     public boolean needsToRunAfterFinalized() { return true; }
 
+    //TODO clean this function
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {

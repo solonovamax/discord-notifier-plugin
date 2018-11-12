@@ -17,7 +17,7 @@
 
   <groupId>nz.co.jammehcow</groupId>
   <artifactId>discord-notifier</artifactId>
-  <version>1.4.1</version>
+  <version>1.4.2</version>
   <packaging>hpi</packaging>
 
   <properties>
