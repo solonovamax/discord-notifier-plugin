@@ -4,10 +4,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
-import hudson.model.Result;
+import hudson.matrix.MatrixConfiguration;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -20,6 +18,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Author: jammehcow.
@@ -36,7 +35,7 @@ public class WebhookPublisher extends Notifier {
     private final boolean enableArtifactList;
     private final boolean enableFooterInfo;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.1";
+    private static final String VERSION = "1.4.2";
 
     @DataBoundConstructor
     public WebhookPublisher(String webhookURL, String thumbnailURL, boolean sendOnStateChange, String statusTitle, String branchName, boolean enableUrlLinking, boolean enableArtifactList, boolean enableFooterInfo) {
@@ -65,6 +64,7 @@ public class WebhookPublisher extends Notifier {
     @Override
     public boolean needsToRunAfterFinalized() { return true; }
 
+    //TODO clean this function
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
@@ -109,20 +109,28 @@ public class WebhookPublisher extends Notifier {
         if (buildresult.isWorseThan(Result.SUCCESS)) statusColor = DiscordWebhook.StatusColor.YELLOW;
         if (buildresult.isWorseThan(Result.UNSTABLE)) statusColor = DiscordWebhook.StatusColor.RED;
 
+        Project project = (Project) build.getProject();
+        StringBuilder combinationString = new StringBuilder();
         if (!this.statusTitle.isEmpty()) {
             wh.setTitle(env.expand(this.statusTitle));
         } else {
-            wh.setTitle(build.getProject().getDisplayName() + " #" + build.getId());
+            wh.setTitle(project.getDisplayName() + " #" + build.getId());
         }
 
-
-        String descriptionPrefix;
+        //Check if MatrixConfiguration
+        if (project instanceof MatrixConfiguration) {
+            wh.setTitle(project.getParent().getDisplayName() + " #" + build.getId());
+            combinationString.append("**Configuration matrix:**\n");
+            for (Map.Entry e : ((MatrixConfiguration) project).getCombination().entrySet())
+                combinationString.append(" - ").append(e.getKey()).append(": ").append(e.getValue()).append("\n");
+        }
 
         String branchNameString ="";
         if (!branchName.isEmpty()) {
             branchNameString = "**Branch:** "+env.expand(branchName)+"\n";
         }
 
+        String descriptionPrefix;
         // Adds links to the description and title if enableUrlLinking is enabled
         if (this.enableUrlLinking) {
             String url = globalConfig.getUrl() + build.getUrl();
@@ -130,15 +138,16 @@ public class WebhookPublisher extends Notifier {
                     + "**Build:** "
                     + getMarkdownHyperlink(build.getId(), url)
                     + "\n**Status:** "
-                    + getMarkdownHyperlink(build.getResult().toString().toLowerCase(), url);
+                    + getMarkdownHyperlink(build.getResult().toString().toLowerCase(), url) + "\n";
             wh.setURL(url);
         } else {
             descriptionPrefix = branchNameString
                     + "**Build:** "
                     + build.getId()
                     + "\n**Status:** "
-                    + build.getResult().toString().toLowerCase();
+                    + build.getResult().toString().toLowerCase() + "\n";
         }
+        descriptionPrefix += combinationString;
 
         wh.setThumbnail(thumbnailURL);
         wh.setDescription(new EmbedDescription(build, globalConfig, descriptionPrefix, this.enableArtifactList).toString());
