@@ -34,6 +34,7 @@ public class EmbedDescription {
                 ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
                 String commitID;
                 if (entry.getCommitId() == null) commitID = "null";
+                else if (entry.getCommitId().length() < 6) commitID = entry.getCommitId();
                 else commitID = entry.getCommitId().substring(0, 6);
 
                 this.changesList.add(String.format("   - ``%s`` *%s - %s*\n",
