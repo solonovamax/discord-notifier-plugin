@@ -5,7 +5,10 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -109,7 +112,7 @@ public class WebhookPublisher extends Notifier {
         if (buildresult.isWorseThan(Result.SUCCESS)) statusColor = DiscordWebhook.StatusColor.YELLOW;
         if (buildresult.isWorseThan(Result.UNSTABLE)) statusColor = DiscordWebhook.StatusColor.RED;
 
-        Project project = (Project) build.getProject();
+        AbstractProject project = build.getProject();
         StringBuilder combinationString = new StringBuilder();
         if (!this.statusTitle.isEmpty()) {
             wh.setTitle(env.expand(this.statusTitle));
