@@ -37,7 +37,7 @@ public class EmbedDescription {
                 else if (entry.getCommitId().length() < 6) commitID = entry.getCommitId();
                 else commitID = entry.getCommitId().substring(0, 6);
 
-                this.changesList.add(String.format("   - ``%s`` *%s - %s*\n",
+                this.changesList.add(String.format("   - ``%s`` *%s - %s*%n",
                         commitID, entry.getMsg(), entry.getAuthor().getFullName()));
             }
         }
