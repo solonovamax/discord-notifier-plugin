@@ -38,7 +38,7 @@ public class WebhookPublisher extends Notifier {
     private final boolean enableArtifactList;
     private final boolean enableFooterInfo;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.3";
+    private static final String VERSION = "1.4.4";
 
     @DataBoundConstructor
     public WebhookPublisher(String webhookURL, String thumbnailURL, boolean sendOnStateChange, String statusTitle, String branchName, boolean enableUrlLinking, boolean enableArtifactList, boolean enableFooterInfo) {
@@ -114,7 +114,7 @@ public class WebhookPublisher extends Notifier {
 
         AbstractProject project = build.getProject();
         StringBuilder combinationString = new StringBuilder();
-        if (!this.statusTitle.isEmpty()) {
+        if (this.statusTitle != null && !this.statusTitle.isEmpty()) {
             wh.setTitle(env.expand(this.statusTitle));
         } else {
             wh.setTitle(project.getDisplayName() + " #" + build.getId());
@@ -129,7 +129,7 @@ public class WebhookPublisher extends Notifier {
         }
 
         String branchNameString ="";
-        if (!branchName.isEmpty()) {
+        if (branchName != null && !branchName.isEmpty()) {
             branchNameString = "**Branch:** "+env.expand(branchName)+"\n";
         }
 
