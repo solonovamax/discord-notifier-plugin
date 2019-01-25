@@ -191,6 +191,7 @@ public class WebhookPublisher extends Notifier {
     }
     
     private static String getMarkdownHyperlink(String content, String url) {
+        url = url.replaceAll("\\)", "\\\\\\)");
         return "[" + content + "](" + url + ")";
     }
 }
