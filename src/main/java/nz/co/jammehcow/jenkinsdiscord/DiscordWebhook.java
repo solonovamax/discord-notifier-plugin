@@ -17,6 +17,7 @@ class DiscordWebhook {
     private String webhookUrl;
     private JSONObject obj;
     private JSONObject embed;
+    private JSONArray fields;
 
     static final int TITLE_LIMIT = 256;
     static final int DESCRIPTION_LIMIT = 2048;
@@ -57,6 +58,7 @@ class DiscordWebhook {
         this.obj.put("username", "Jenkins");
         this.obj.put("avatar_url", "https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png");
         this.embed = new JSONObject();
+        this.fields = new JSONArray();
     }
 
     /**
@@ -127,6 +129,14 @@ class DiscordWebhook {
         return this;
     }
 
+    public DiscordWebhook addField(String name, String value) {
+        JSONObject field = new JSONObject();
+        field.put("name", name);
+        field.put("value", value);
+        this.fields.put(field);
+        return this;
+    }
+
     /**
      * Sets the embed's footer text.
      *
@@ -144,6 +154,7 @@ class DiscordWebhook {
      * @throws WebhookException the webhook exception
      */
     public void send() throws WebhookException {
+        this.embed.put("fields", fields);
         if (this.embed.toString().length() > 6000)
             throw new WebhookException("Embed object larger than the limit (" + this.embed.toString().length() + ">6000).");
 

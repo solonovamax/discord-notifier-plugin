@@ -24,7 +24,6 @@ public class EmbedDescription {
         String artifactsURL = globalConfig.getUrl() + build.getUrl() + "artifact/";
         this.prefix = prefix;
         this.changesList.add("\n**Changes:**\n");
-        if (enableArtifactsList) this.artifactsList.add("\n**Artifacts:**\n");
         Object[] changes = build.getChangeSet().getItems();
 
         if (changes.length == 0) {
@@ -43,6 +42,7 @@ public class EmbedDescription {
         }
 
         if (enableArtifactsList) {
+            this.artifactsList.add("\n**Artifacts:**\n");
             //noinspection unchecked
             List<Run.Artifact> artifacts = build.getArtifacts();
             if (artifacts.size() == 0) {
