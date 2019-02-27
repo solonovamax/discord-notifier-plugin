@@ -14,7 +14,10 @@
       <f:textbox />
     </f:entry>
     <f:entry title="Thumbnail URL" field="thumbnailURL">
-            <f:textbox />
+        <f:textbox />
+    </f:entry>
+    <f:entry title="Notes" field="notes">
+        <f:textbox />
     </f:entry>
     <f:entry title="Enable URL linking" field="enableUrlLinking">
       <f:checkbox />

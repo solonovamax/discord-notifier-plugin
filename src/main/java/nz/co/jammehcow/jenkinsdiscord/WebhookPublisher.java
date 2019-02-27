@@ -33,6 +33,7 @@ public class WebhookPublisher extends Notifier {
     private final String branchName;
     private final String statusTitle;
     private final String thumbnailURL;
+    private final String notes;
     private final boolean sendOnStateChange;
     private boolean enableUrlLinking;
     private final boolean enableArtifactList;
@@ -41,7 +42,17 @@ public class WebhookPublisher extends Notifier {
     private static final String VERSION = "1.4.4";
 
     @DataBoundConstructor
-    public WebhookPublisher(String webhookURL, String thumbnailURL, boolean sendOnStateChange, String statusTitle, String branchName, boolean enableUrlLinking, boolean enableArtifactList, boolean enableFooterInfo) {
+    public WebhookPublisher(
+            String webhookURL,
+            String thumbnailURL,
+            boolean sendOnStateChange,
+            String statusTitle,
+            String notes,
+            String branchName,
+            boolean enableUrlLinking,
+            boolean enableArtifactList,
+            boolean enableFooterInfo
+    ) {
         this.webhookURL = webhookURL;
         this.thumbnailURL = thumbnailURL;
         this.sendOnStateChange = sendOnStateChange;
@@ -50,22 +61,49 @@ public class WebhookPublisher extends Notifier {
         this.enableFooterInfo = enableFooterInfo;
         this.branchName = branchName;
         this.statusTitle = statusTitle;
+        this.notes = notes;
     }
 
-    public String getWebhookURL() { return this.webhookURL; }
-    public String getBranchName() { return this.branchName; }
-    public String getStatusTitle() { return this.statusTitle; }
+    public String getWebhookURL() {
+        return this.webhookURL;
+    }
+
+    public String getBranchName() {
+        return this.branchName;
+    }
+
+    public String getStatusTitle() {
+        return this.statusTitle;
+    }
+
+    public String getNotes() {
+        return this.notes;
+    }
 
     public String getThumbnailURL() {
         return this.thumbnailURL;
     }
-    public boolean isSendOnStateChange() { return this.sendOnStateChange; }
-    public boolean isEnableUrlLinking() { return this.enableUrlLinking; }
-    public boolean isEnableArtifactList() { return this.enableArtifactList; }
-    public boolean isEnableFooterInfo() { return this.enableFooterInfo; }
+
+    public boolean isSendOnStateChange() {
+        return this.sendOnStateChange;
+    }
+
+    public boolean isEnableUrlLinking() {
+        return this.enableUrlLinking;
+    }
+
+    public boolean isEnableArtifactList() {
+        return this.enableArtifactList;
+    }
+
+    public boolean isEnableFooterInfo() {
+        return this.enableFooterInfo;
+    }
 
     @Override
-    public boolean needsToRunAfterFinalized() { return true; }
+    public boolean needsToRunAfterFinalized() {
+        return true;
+    }
 
     //TODO clean this function
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
@@ -128,9 +166,9 @@ public class WebhookPublisher extends Notifier {
                 combinationString.append(" - ").append(e.getKey()).append(": ").append(e.getValue()).append("\n");
         }
 
-        String branchNameString ="";
+        String branchNameString = "";
         if (branchName != null && !branchName.isEmpty()) {
-            branchNameString = "**Branch:** "+env.expand(branchName)+"\n";
+            branchNameString = "**Branch:** " + env.expand(branchName) + "\n";
         }
 
         String descriptionPrefix;
@@ -152,11 +190,16 @@ public class WebhookPublisher extends Notifier {
         }
         descriptionPrefix += combinationString;
 
+        if (notes != null && notes.length() > 0) {
+            wh.addField("Notes", notes);
+        }
+
         wh.setThumbnail(thumbnailURL);
         wh.setDescription(new EmbedDescription(build, globalConfig, descriptionPrefix, this.enableArtifactList).toString());
         wh.setStatus(statusColor);
 
-        if (this.enableFooterInfo) wh.setFooter("Jenkins v" + build.getHudsonVersion() + ", " + getDescriptor().getDisplayName() + " v" + getDescriptor().getVersion());
+        if (this.enableFooterInfo)
+            wh.setFooter("Jenkins v" + build.getHudsonVersion() + ", " + getDescriptor().getDisplayName() + " v" + getDescriptor().getVersion());
 
         try {
             listener.getLogger().println("Sending notification to Discord.");
@@ -169,15 +212,21 @@ public class WebhookPublisher extends Notifier {
     }
 
 
-    public BuildStepMonitor getRequiredMonitorService() { return BuildStepMonitor.NONE; }
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.NONE;
+    }
 
 
     @Override
-    public DescriptorImpl getDescriptor() { return (DescriptorImpl) super.getDescriptor(); }
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
 
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) { return true; }
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
+        }
 
         public FormValidation doCheckWebhookURL(@QueryParameter String value) {
             if (!value.matches("https://(canary\\.|ptb\\.|)discordapp\\.com/api/webhooks/\\d{18}/(\\w|-|_)*(/?)"))
@@ -185,11 +234,15 @@ public class WebhookPublisher extends Notifier {
             return FormValidation.ok();
         }
 
-        public String getDisplayName() { return NAME; }
+        public String getDisplayName() {
+            return NAME;
+        }
 
-        public String getVersion() { return VERSION; }
+        public String getVersion() {
+            return VERSION;
+        }
     }
-    
+
     private static String getMarkdownHyperlink(String content, String url) {
         url = url.replaceAll("\\)", "\\\\\\)");
         return "[" + content + "](" + url + ")";
