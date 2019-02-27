@@ -3,6 +3,7 @@ package nz.co.jammehcow.jenkinsdiscord.util;
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
+import hudson.scm.NullSCM;
 import jenkins.model.JenkinsLocationConfiguration;
 
 import java.util.LinkedList;
@@ -23,21 +24,23 @@ public class EmbedDescription {
     public EmbedDescription(AbstractBuild build, JenkinsLocationConfiguration globalConfig, String prefix, boolean enableArtifactsList) {
         String artifactsURL = globalConfig.getUrl() + build.getUrl() + "artifact/";
         this.prefix = prefix;
-        this.changesList.add("\n**Changes:**\n");
-        Object[] changes = build.getChangeSet().getItems();
 
-        if (changes.length == 0) {
-            this.changesList.add("\n*No changes.*\n");
-        } else {
-            for (Object o : changes) {
-                ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
-                String commitID;
-                if (entry.getCommitId() == null) commitID = "null";
-                else if (entry.getCommitId().length() < 6) commitID = entry.getCommitId();
-                else commitID = entry.getCommitId().substring(0, 6);
+        if (!(build.getProject().getScm() instanceof NullSCM)) {
+            this.changesList.add("\n**Changes:**\n");
+            Object[] changes = build.getChangeSet().getItems();
+            if (changes.length == 0) {
+                this.changesList.add("\n*No changes.*\n");
+            } else {
+                for (Object o : changes) {
+                    ChangeLogSet.Entry entry = (ChangeLogSet.Entry) o;
+                    String commitID;
+                    if (entry.getCommitId() == null) commitID = "null";
+                    else if (entry.getCommitId().length() < 6) commitID = entry.getCommitId();
+                    else commitID = entry.getCommitId().substring(0, 6);
 
-                this.changesList.add(String.format("   - ``%s`` *%s - %s*%n",
-                        commitID, entry.getMsg(), entry.getAuthor().getFullName()));
+                    this.changesList.add(String.format("   - ``%s`` *%s - %s*%n",
+                            commitID, entry.getMsg(), entry.getAuthor().getFullName()));
+                }
             }
         }
 
