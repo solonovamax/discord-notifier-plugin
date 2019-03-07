@@ -21,11 +21,17 @@ public class EmbedDescription {
     private String prefix;
     private String finalDescription;
 
-    public EmbedDescription(AbstractBuild build, JenkinsLocationConfiguration globalConfig, String prefix, boolean enableArtifactsList) {
+    public EmbedDescription(
+            AbstractBuild build,
+            JenkinsLocationConfiguration globalConfig,
+            String prefix,
+            boolean enableArtifactsList,
+            boolean showChangeset
+    ) {
         String artifactsURL = globalConfig.getUrl() + build.getUrl() + "artifact/";
         this.prefix = prefix;
 
-        if (!(build.getProject().getScm() instanceof NullSCM)) {
+        if (!(build.getProject().getScm() instanceof NullSCM) && showChangeset) {
             this.changesList.add("\n**Changes:**\n");
             Object[] changes = build.getChangeSet().getItems();
             if (changes.length == 0) {

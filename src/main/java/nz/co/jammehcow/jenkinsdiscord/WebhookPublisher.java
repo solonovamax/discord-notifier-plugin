@@ -38,8 +38,9 @@ public class WebhookPublisher extends Notifier {
     private boolean enableUrlLinking;
     private final boolean enableArtifactList;
     private final boolean enableFooterInfo;
+    private boolean showChangeset;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.4";
+    private static final String VERSION = "1.4.6";
 
     @DataBoundConstructor
     public WebhookPublisher(
@@ -51,7 +52,8 @@ public class WebhookPublisher extends Notifier {
             String branchName,
             boolean enableUrlLinking,
             boolean enableArtifactList,
-            boolean enableFooterInfo
+            boolean enableFooterInfo,
+            boolean showChangeset
     ) {
         this.webhookURL = webhookURL;
         this.thumbnailURL = thumbnailURL;
@@ -59,6 +61,7 @@ public class WebhookPublisher extends Notifier {
         this.enableUrlLinking = enableUrlLinking;
         this.enableArtifactList = enableArtifactList;
         this.enableFooterInfo = enableFooterInfo;
+        this.showChangeset = showChangeset;
         this.branchName = branchName;
         this.statusTitle = statusTitle;
         this.notes = notes;
@@ -98,6 +101,10 @@ public class WebhookPublisher extends Notifier {
 
     public boolean isEnableFooterInfo() {
         return this.enableFooterInfo;
+    }
+
+    public boolean isShowChangeset() {
+        return this.showChangeset;
     }
 
     @Override
@@ -195,7 +202,10 @@ public class WebhookPublisher extends Notifier {
         }
 
         wh.setThumbnail(thumbnailURL);
-        wh.setDescription(new EmbedDescription(build, globalConfig, descriptionPrefix, this.enableArtifactList).toString());
+        wh.setDescription(
+                new EmbedDescription(build, globalConfig, descriptionPrefix, this.enableArtifactList, this.showChangeset)
+                        .toString()
+        );
         wh.setStatus(statusColor);
 
         if (this.enableFooterInfo)

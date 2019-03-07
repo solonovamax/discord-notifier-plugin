@@ -28,5 +28,8 @@
     <f:entry title="Enable version info in footer" field="enableFooterInfo">
       <f:checkbox default="true" />
     </f:entry>
+    <f:entry title="Show changeset in embed" field="showChangeset">
+      <f:checkbox default="true" />
+    </f:entry>
   </f:advanced>
 </j:jelly>
