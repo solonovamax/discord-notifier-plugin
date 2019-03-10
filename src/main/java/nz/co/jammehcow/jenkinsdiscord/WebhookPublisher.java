@@ -198,7 +198,7 @@ public class WebhookPublisher extends Notifier {
         descriptionPrefix += combinationString;
 
         if (notes != null && notes.length() > 0) {
-            wh.addField("Notes", notes);
+            wh.setContent(notes);
         }
 
         wh.setThumbnail(thumbnailURL);

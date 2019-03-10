@@ -105,6 +105,11 @@ class DiscordWebhook {
         return this;
     }
 
+    public DiscordWebhook setContent(String content) {
+        this.obj.put("content", content);
+        return this;
+    }
+
     /**
      * Sets the URL of image at the bottom of embed.
      * @param url URL of image
