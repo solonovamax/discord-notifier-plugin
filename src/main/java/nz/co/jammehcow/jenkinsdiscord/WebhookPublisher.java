@@ -39,6 +39,7 @@ public class WebhookPublisher extends Notifier {
     private final boolean enableArtifactList;
     private final boolean enableFooterInfo;
     private boolean showChangeset;
+    private boolean sendLogFile;
     private static final String NAME = "Discord Notifier";
     private static final String VERSION = "1.4.6";
 
@@ -53,7 +54,8 @@ public class WebhookPublisher extends Notifier {
             boolean enableUrlLinking,
             boolean enableArtifactList,
             boolean enableFooterInfo,
-            boolean showChangeset
+            boolean showChangeset,
+            boolean sendLogFile
     ) {
         this.webhookURL = webhookURL;
         this.thumbnailURL = thumbnailURL;
@@ -65,6 +67,7 @@ public class WebhookPublisher extends Notifier {
         this.branchName = branchName;
         this.statusTitle = statusTitle;
         this.notes = notes;
+        this.sendLogFile = sendLogFile;
     }
 
     public String getWebhookURL() {
@@ -105,6 +108,10 @@ public class WebhookPublisher extends Notifier {
 
     public boolean isShowChangeset() {
         return this.showChangeset;
+    }
+
+    public boolean isSendLogFile() {
+        return this.sendLogFile;
     }
 
     @Override
@@ -148,6 +155,10 @@ public class WebhookPublisher extends Notifier {
                 // Stops the webhook payload being created if the status is the same as the previous
                 return true;
             }
+        }
+
+        if (this.sendLogFile) {
+            wh.setFile(build.getLogFile());
         }
 
         DiscordWebhook.StatusColor statusColor = DiscordWebhook.StatusColor.GREEN;

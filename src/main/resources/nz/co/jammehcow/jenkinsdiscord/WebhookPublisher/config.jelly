@@ -31,5 +31,8 @@
     <f:entry title="Show changeset in embed" field="showChangeset">
       <f:checkbox default="true" />
     </f:entry>
+    <f:entry title="Send log file to discord" field="sendLogFile">
+      <f:checkbox default="false" />
+    </f:entry>
   </f:advanced>
 </j:jelly>

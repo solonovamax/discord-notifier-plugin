@@ -6,8 +6,9 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 
 /**
  * Author: jammehcow.
@@ -18,6 +19,7 @@ class DiscordWebhook {
     private JSONObject obj;
     private JSONObject embed;
     private JSONArray fields;
+    private File file;
 
     static final int TITLE_LIMIT = 256;
     static final int DESCRIPTION_LIMIT = 2048;
@@ -153,6 +155,11 @@ class DiscordWebhook {
         return this;
     }
 
+    public DiscordWebhook setFile(File file) {
+        this.file = file;
+        return this;
+    }
+
     /**
      * Send the payload to Discord.
      *
@@ -166,12 +173,20 @@ class DiscordWebhook {
         this.obj.put("embeds", new JSONArray().put(this.embed));
 
         try {
-            HttpResponse<JsonNode> response = Unirest.post(this.webhookUrl).header("Content-Type", "application/json").body(this.obj).asJson();
+            HttpResponse<JsonNode> response;
+            if (file != null) {
+                response = Unirest.post(this.webhookUrl)
+                        .field("payload_json", obj.toString())
+                        .field("file", file)
+                        .asJson();
+            } else {
+                response = Unirest.post(this.webhookUrl)
+                        .field("payload_json", obj.toString())
+                        .asJson();
+            }
 
-            try {
-                if (response.getBody() == null || response.getBody().getObject().get("embeds") == null) throw new JSONException("Expected.");
+            if (response.getStatus() < 200 || response.getStatus() >= 300)
                 throw new WebhookException(response.getBody().getObject().toString(2));
-            } catch (JSONException ignored) {}
         } catch (UnirestException e) { e.printStackTrace(); }
     }
 }
