@@ -158,7 +158,7 @@ public class WebhookPublisher extends Notifier {
         }
 
         if (this.sendLogFile) {
-            wh.setFile(build.getLogFile());
+            wh.setFile(build.getLogInputStream());
         }
 
         DiscordWebhook.StatusColor statusColor = DiscordWebhook.StatusColor.GREEN;

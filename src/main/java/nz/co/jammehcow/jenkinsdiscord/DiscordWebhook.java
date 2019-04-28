@@ -8,7 +8,7 @@ import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
+import java.io.InputStream;
 
 /**
  * Author: jammehcow.
@@ -19,7 +19,7 @@ class DiscordWebhook {
     private JSONObject obj;
     private JSONObject embed;
     private JSONArray fields;
-    private File file;
+    private InputStream file;
 
     static final int TITLE_LIMIT = 256;
     static final int DESCRIPTION_LIMIT = 2048;
@@ -155,8 +155,8 @@ class DiscordWebhook {
         return this;
     }
 
-    public DiscordWebhook setFile(File file) {
-        this.file = file;
+    public DiscordWebhook setFile(InputStream is) {
+        this.file = is;
         return this;
     }
 
@@ -177,7 +177,7 @@ class DiscordWebhook {
             if (file != null) {
                 response = Unirest.post(this.webhookUrl)
                         .field("payload_json", obj.toString())
-                        .field("file", file)
+                        .field("file", file, "build.log")
                         .asJson();
             } else {
                 response = Unirest.post(this.webhookUrl)
