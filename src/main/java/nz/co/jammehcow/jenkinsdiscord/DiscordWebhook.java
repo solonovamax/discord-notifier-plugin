@@ -20,6 +20,7 @@ class DiscordWebhook {
     private JSONObject embed;
     private JSONArray fields;
     private InputStream file;
+    private String filename;
 
     static final int TITLE_LIMIT = 256;
     static final int DESCRIPTION_LIMIT = 2048;
@@ -155,8 +156,9 @@ class DiscordWebhook {
         return this;
     }
 
-    public DiscordWebhook setFile(InputStream is) {
+    public DiscordWebhook setFile(InputStream is, String filename) {
         this.file = is;
+        this.filename = filename;
         return this;
     }
 
@@ -177,7 +179,7 @@ class DiscordWebhook {
             if (file != null) {
                 response = Unirest.post(this.webhookUrl)
                         .field("payload_json", obj.toString())
-                        .field("file", file, "build.log")
+                        .field("file", file, filename)
                         .asJson();
             } else {
                 response = Unirest.post(this.webhookUrl)
