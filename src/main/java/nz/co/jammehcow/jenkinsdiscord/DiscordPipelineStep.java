@@ -26,6 +26,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     private String image;
     private String thumbnail;
     private String result;
+    private String notes;
     private boolean successful;
     private boolean unstable;
 
@@ -119,6 +120,15 @@ public class DiscordPipelineStep extends AbstractStepImpl {
         return result;
     }
 
+    @DataBoundSetter
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
     public static class DiscordPipelineStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         @Inject
         transient DiscordPipelineStep step;
@@ -156,6 +166,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             wh.setImage(step.getImage());
             wh.setFooter(checkLimitAndTruncate("footer", step.getFooter(), FOOTER_LIMIT));
             wh.setStatus(statusColor);
+            wh.setContent(step.getNotes());
 
             try { wh.send(); }
             catch (WebhookException e) { e.printStackTrace(listener.getLogger()); }
