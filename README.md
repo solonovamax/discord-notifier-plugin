@@ -14,8 +14,7 @@ Through this plugin you are able to:
 
 ## Download
 
-You'll have to manually install the plugin via the advanced tab of your plugin settings.
-A Jenkins plugin repo build will be available soon.
+Discord notifier is available in official jenkins repos.
 
 ## Usage
 
