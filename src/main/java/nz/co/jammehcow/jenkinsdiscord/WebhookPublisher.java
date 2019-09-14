@@ -40,8 +40,9 @@ public class WebhookPublisher extends Notifier {
     private final boolean enableFooterInfo;
     private boolean showChangeset;
     private boolean sendLogFile;
+    private boolean sendStartNotification;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.8";
+    private static final String VERSION = "1.4.9";
 
     @DataBoundConstructor
     public WebhookPublisher(
@@ -55,7 +56,8 @@ public class WebhookPublisher extends Notifier {
             boolean enableArtifactList,
             boolean enableFooterInfo,
             boolean showChangeset,
-            boolean sendLogFile
+            boolean sendLogFile,
+            boolean sendStartNotification
     ) {
         this.webhookURL = webhookURL;
         this.thumbnailURL = thumbnailURL;
@@ -68,6 +70,7 @@ public class WebhookPublisher extends Notifier {
         this.statusTitle = statusTitle;
         this.notes = notes;
         this.sendLogFile = sendLogFile;
+        this.sendStartNotification = sendStartNotification;
     }
 
     public String getWebhookURL() {
@@ -114,8 +117,58 @@ public class WebhookPublisher extends Notifier {
         return this.sendLogFile;
     }
 
+    public boolean isSendStartNotification() {
+        return this.sendStartNotification;
+    }
+
     @Override
     public boolean needsToRunAfterFinalized() {
+        return true;
+    }
+
+    @Override
+    public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
+        final EnvVars env;
+        listener.getLogger().println(sendStartNotification);
+        listener.getLogger().println("xasfewrhet");
+        if (sendStartNotification) {
+            try {
+                env = build.getEnvironment(listener);
+                DiscordWebhook wh = new DiscordWebhook(env.expand(this.webhookURL));
+                AbstractProject project = build.getProject();
+                String description;
+                JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
+                if (globalConfig == null) {
+                    listener.getLogger().println("[Discord Notifier] JenkinsLocationConfiguration is null!");
+                    return true;
+                }
+                wh.setStatus(DiscordWebhook.StatusColor.GREEN);
+                if (this.statusTitle != null && !this.statusTitle.isEmpty()) {
+                    wh.setTitle("Build started: " + env.expand(this.statusTitle));
+                } else {
+                    wh.setTitle("Build started: " + project.getDisplayName() + " #" + build.getId());
+                }
+                String branchNameString = "";
+                if (branchName != null && !branchName.isEmpty()) {
+                    branchNameString = "**Branch:** " + env.expand(branchName) + "\n";
+                }
+                if (this.enableUrlLinking) {
+                    String url = globalConfig.getUrl() + build.getUrl();
+                    description = branchNameString
+                            + "**Build:** "
+                            + getMarkdownHyperlink(build.getId(), url);
+                    wh.setURL(url);
+                } else {
+                    description = branchNameString
+                            + "**Build:** "
+                            + build.getId();
+                }
+                wh.setDescription(new EmbedDescription(build, globalConfig, description, false, false).toString());
+                wh.send();
+            } catch (Exception e) {
+                e.printStackTrace(listener.getLogger());
+            }
+        }
         return true;
     }
 
@@ -232,11 +285,9 @@ public class WebhookPublisher extends Notifier {
         return true;
     }
 
-
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
-
 
     @Override
     public DescriptorImpl getDescriptor() {

@@ -156,7 +156,7 @@ class DiscordWebhook {
         return this;
     }
 
-    public DiscordWebhook setFile(InputStream is, String filename) {
+    DiscordWebhook setFile(InputStream is, String filename) {
         this.file = is;
         this.filename = filename;
         return this;
@@ -187,8 +187,9 @@ class DiscordWebhook {
                         .asJson();
             }
 
-            if (response.getStatus() < 200 || response.getStatus() >= 300)
+            if (response.getStatus() < 200 || response.getStatus() >= 300) {
                 throw new WebhookException(response.getBody().getObject().toString(2));
+            }
         } catch (UnirestException e) { e.printStackTrace(); }
     }
 }
