@@ -138,10 +138,6 @@ public class WebhookPublisher extends Notifier {
                 AbstractProject project = build.getProject();
                 String description;
                 JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
-                if (globalConfig == null) {
-                    listener.getLogger().println("[Discord Notifier] JenkinsLocationConfiguration is null!");
-                    return true;
-                }
                 wh.setStatus(DiscordWebhook.StatusColor.GREEN);
                 if (this.statusTitle != null && !this.statusTitle.isEmpty()) {
                     wh.setTitle("Build started: " + env.expand(this.statusTitle));
@@ -165,8 +161,8 @@ public class WebhookPublisher extends Notifier {
                 }
                 wh.setDescription(new EmbedDescription(build, globalConfig, description, false, false).toString());
                 wh.send();
-            } catch (Exception e) {
-                e.printStackTrace(listener.getLogger());
+            } catch (WebhookException | InterruptedException | IOException e1) {
+                e1.printStackTrace(listener.getLogger());
             }
         }
         return true;
@@ -179,10 +175,6 @@ public class WebhookPublisher extends Notifier {
         final EnvVars env = build.getEnvironment(listener);
         // The global configuration, used to fetch the instance url
         JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
-        if (globalConfig == null) {
-            listener.getLogger().println("[Discord Notifier] JenkinsLocationConfiguration is null!");
-            return true;
-        }
         if (build.getResult() == null) {
             listener.getLogger().println("[Discord Notifier] build.getResult() is null!");
             return true;
