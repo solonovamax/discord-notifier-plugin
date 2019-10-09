@@ -4,19 +4,20 @@ import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.*;
 
-public class DiscordPipelineStep extends AbstractStepImpl {
+public class DiscordPipelineStep extends Step {
     private final String webhookURL;
 
     private String title;
@@ -129,15 +130,28 @@ public class DiscordPipelineStep extends AbstractStepImpl {
         return notes;
     }
 
-    public static class DiscordPipelineStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
-        @Inject
-        transient DiscordPipelineStep step;
+    @Override
+    public StepExecution start(StepContext stepContext) throws Exception {
+        return new DiscordPipelineStepExecution(stepContext, this);
+    }
 
-        @StepContextParameter
+    public static class DiscordPipelineStepExecution extends SynchronousNonBlockingStepExecution<Void> {
+        transient DiscordPipelineStep step;
         private transient TaskListener listener;
 
+        @Inject
+        protected DiscordPipelineStepExecution(@Nonnull StepContext context, DiscordPipelineStep step) {
+            super(context);
+            this.step = step;
+            try {
+                listener = context.get(TaskListener.class);
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         @Override
-        protected Void run() throws Exception {
+        protected Void run() {
             listener.getLogger().println("Sending notification to Discord.");
 
             DiscordWebhook.StatusColor statusColor;
@@ -190,8 +204,12 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     }
 
     @Extension
-    public static class DescriptorImpl extends AbstractStepDescriptorImpl {
-        public DescriptorImpl() { super(DiscordPipelineStepExecution.class); }
+    public static class DescriptorImpl extends StepDescriptor {
+
+        @Override
+        public Set<? extends Class<?>> getRequiredContext() {
+            return new HashSet<>(Collections.singletonList(TaskListener.class));
+        }
 
         @Override
         public String getFunctionName() {

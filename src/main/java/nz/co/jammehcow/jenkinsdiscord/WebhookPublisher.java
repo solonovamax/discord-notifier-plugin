@@ -42,7 +42,7 @@ public class WebhookPublisher extends Notifier {
     private boolean sendLogFile;
     private boolean sendStartNotification;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.10";
+    private static final String VERSION = "1.4.11";
 
     @DataBoundConstructor
     public WebhookPublisher(
@@ -130,7 +130,6 @@ public class WebhookPublisher extends Notifier {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final EnvVars env;
         listener.getLogger().println(sendStartNotification);
-        listener.getLogger().println("xasfewrhet");
         if (sendStartNotification) {
             try {
                 env = build.getEnvironment(listener);
@@ -254,7 +253,7 @@ public class WebhookPublisher extends Notifier {
         descriptionPrefix += combinationString;
 
         if (notes != null && notes.length() > 0) {
-            wh.setContent(notes);
+            wh.setContent(env.expand(notes));
         }
 
         wh.setThumbnail(thumbnailURL);
