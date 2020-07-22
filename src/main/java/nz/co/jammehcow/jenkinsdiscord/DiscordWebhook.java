@@ -5,6 +5,8 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
+
+import org.apache.http.HttpHost;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -168,6 +170,7 @@ class DiscordWebhook {
      * @throws WebhookException the webhook exception
      */
     public void send() throws WebhookException {
+    	
         this.embed.put("fields", fields);
         if (this.embed.toString().length() > 6000)
             throw new WebhookException("Embed object larger than the limit (" + this.embed.toString().length() + ">6000).");
@@ -175,6 +178,13 @@ class DiscordWebhook {
         this.obj.put("embeds", new JSONArray().put(this.embed));
 
         try {
+        	if( jenkins.model.Jenkins.getInstance()!=null && jenkins.model.Jenkins.getInstance().proxy != null ){
+        		String proxyIP = jenkins.model.Jenkins.getInstance().proxy.name;
+        		int proxyPort=jenkins.model.Jenkins.getInstance().proxy.port;
+        		if(!proxyIP.equals("")){
+        			Unirest.setProxy(new HttpHost(proxyIP, proxyPort));
+        		}
+        	}
             HttpResponse<JsonNode> response;
             if (file != null) {
                 response = Unirest.post(this.webhookUrl)
