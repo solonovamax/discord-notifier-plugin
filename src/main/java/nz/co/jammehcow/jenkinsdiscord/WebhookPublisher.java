@@ -130,7 +130,6 @@ public class WebhookPublisher extends Notifier {
     public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
         final EnvVars env;
         listener.getLogger().println(sendStartNotification);
-        listener.getLogger().println("xasfewrhet");
         if (sendStartNotification) {
             try {
                 env = build.getEnvironment(listener);
