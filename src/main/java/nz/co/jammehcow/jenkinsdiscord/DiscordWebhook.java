@@ -178,13 +178,13 @@ class DiscordWebhook {
         this.obj.put("embeds", new JSONArray().put(this.embed));
 
         try {
-        	if( jenkins.model.Jenkins.getInstance()!=null && jenkins.model.Jenkins.getInstance().proxy != null ){
-        		String proxyIP = jenkins.model.Jenkins.getInstance().proxy.name;
-        		int proxyPort=jenkins.model.Jenkins.getInstance().proxy.port;
-        		if(!proxyIP.equals("")){
-        			Unirest.setProxy(new HttpHost(proxyIP, proxyPort));
-        		}
-        	}
+            if (jenkins.model.Jenkins.getInstanceOrNull() != null && jenkins.model.Jenkins.getInstanceOrNull().proxy != null) {
+                String proxyIP = jenkins.model.Jenkins.getInstanceOrNull().proxy.name;
+                int proxyPort = jenkins.model.Jenkins.getInstanceOrNull().proxy.port;
+                if (!proxyIP.equals("")) {
+                    Unirest.setProxy(new HttpHost(proxyIP, proxyPort));
+                }
+            }
             HttpResponse<JsonNode> response;
             if (file != null) {
                 response = Unirest.post(this.webhookUrl)
