@@ -34,6 +34,8 @@ public class WebhookPublisher extends Notifier {
     private final String statusTitle;
     private final String thumbnailURL;
     private final String notes;
+    private final String customAvatarUrl;
+    private final String customUsername;
     private final boolean sendOnStateChange;
     private boolean enableUrlLinking;
     private final boolean enableArtifactList;
@@ -52,6 +54,8 @@ public class WebhookPublisher extends Notifier {
             String statusTitle,
             String notes,
             String branchName,
+            String customAvatarUrl,
+            String customUsername,
             boolean enableUrlLinking,
             boolean enableArtifactList,
             boolean enableFooterInfo,
@@ -69,6 +73,8 @@ public class WebhookPublisher extends Notifier {
         this.branchName = branchName;
         this.statusTitle = statusTitle;
         this.notes = notes;
+        this.customAvatarUrl = customAvatarUrl;
+        this.customUsername = customUsername;
         this.sendLogFile = sendLogFile;
         this.sendStartNotification = sendStartNotification;
     }
@@ -83,6 +89,14 @@ public class WebhookPublisher extends Notifier {
 
     public String getStatusTitle() {
         return this.statusTitle;
+    }
+
+    public String getCustomAvatarUrl() {
+        return this.customAvatarUrl;
+    }
+
+    public String getCustomUsername() {
+        return this.customUsername;
     }
 
     public String getNotes() {
@@ -255,6 +269,14 @@ public class WebhookPublisher extends Notifier {
 
         if (notes != null && notes.length() > 0) {
             wh.setContent(env.expand(notes));
+        }
+
+        if (customAvatarUrl != null && !customAvatarUrl.isEmpty()) {
+            wh.setCustomAvatarUrl(customAvatarUrl);
+        }
+
+        if (customUsername != null && !customUsername.isEmpty()) {
+            wh.setCustomUsername(customUsername);
         }
 
         wh.setThumbnail(thumbnailURL);
