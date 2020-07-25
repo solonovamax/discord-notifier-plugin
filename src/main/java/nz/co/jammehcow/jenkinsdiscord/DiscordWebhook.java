@@ -4,8 +4,8 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import jenkins.model.Jenkins;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
-
 import org.apache.http.HttpHost;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -178,9 +178,10 @@ class DiscordWebhook {
         this.obj.put("embeds", new JSONArray().put(this.embed));
 
         try {
-            if (jenkins.model.Jenkins.getInstanceOrNull() != null && jenkins.model.Jenkins.getInstanceOrNull().proxy != null) {
-                String proxyIP = jenkins.model.Jenkins.getInstanceOrNull().proxy.name;
-                int proxyPort = jenkins.model.Jenkins.getInstanceOrNull().proxy.port;
+            final Jenkins instance = jenkins.model.Jenkins.getInstanceOrNull();
+            if (instance != null && instance.proxy != null) {
+                String proxyIP = instance.proxy.name;
+                int proxyPort = instance.proxy.port;
                 if (!proxyIP.equals("")) {
                     Unirest.setProxy(new HttpHost(proxyIP, proxyPort));
                 }
