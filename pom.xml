@@ -16,7 +16,7 @@
 
   <groupId>nz.co.jammehcow</groupId>
   <artifactId>discord-notifier</artifactId>
-  <version>1.4.13-SNAPSHOT</version>
+  <version>1.4.11</version>
   <packaging>hpi</packaging>
 
   <properties>
@@ -28,7 +28,7 @@
     <connection>scm:git:git://github.com/jenkinsci/discord-notifier-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/discord-notifier-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/discord-notifier-plugin</url>
-    <tag>HEAD</tag>
+    <tag>v2.</tag>
   </scm>
 
   <licenses>
