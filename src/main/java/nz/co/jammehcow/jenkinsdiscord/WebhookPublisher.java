@@ -44,7 +44,7 @@ public class WebhookPublisher extends Notifier {
     private boolean sendLogFile;
     private boolean sendStartNotification;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.11";
+    private static final String VERSION = "1.4.14";
 
     @DataBoundConstructor
     public WebhookPublisher(
