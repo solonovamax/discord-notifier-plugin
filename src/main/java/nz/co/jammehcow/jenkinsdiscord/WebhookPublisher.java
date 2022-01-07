@@ -1,6 +1,5 @@
 package nz.co.jammehcow.jenkinsdiscord;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -182,7 +181,6 @@ public class WebhookPublisher extends Notifier {
     }
 
     //TODO clean this function
-    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         final EnvVars env = build.getEnvironment(listener);

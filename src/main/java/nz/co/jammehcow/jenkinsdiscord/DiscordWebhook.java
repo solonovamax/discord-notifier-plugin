@@ -1,12 +1,12 @@
 package nz.co.jammehcow.jenkinsdiscord;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import jenkins.model.Jenkins;
+import kong.unirest.HttpResponse;
+import kong.unirest.JsonNode;
+import kong.unirest.Proxy;
+import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
-import org.apache.http.HttpHost;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -200,12 +200,12 @@ class DiscordWebhook {
         this.obj.put("embeds", new JSONArray().put(this.embed));
 
         try {
-            final Jenkins instance = jenkins.model.Jenkins.getInstanceOrNull();
+            final Jenkins instance = Jenkins.getInstanceOrNull();
             if (instance != null && instance.proxy != null) {
                 String proxyIP = instance.proxy.name;
                 int proxyPort = instance.proxy.port;
                 if (!proxyIP.equals("")) {
-                    Unirest.setProxy(new HttpHost(proxyIP, proxyPort));
+                    Unirest.config().proxy(new Proxy(proxyIP, proxyPort));
                 }
             }
             HttpResponse<JsonNode> response;
