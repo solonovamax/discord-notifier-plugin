@@ -201,7 +201,7 @@ class DiscordWebhook {
 
         try {
             final Jenkins instance = Jenkins.getInstanceOrNull();
-            if (instance != null && instance.proxy != null) {
+            if (instance != null && instance.proxy != null && !Unirest.config().isRunning()) {
                 String proxyIP = instance.proxy.name;
                 int proxyPort = instance.proxy.port;
                 if (!proxyIP.equals("")) {
