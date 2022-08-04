@@ -332,7 +332,7 @@ public class WebhookPublisher extends Notifier {
         }
 
         public FormValidation doCheckWebhookURL(@QueryParameter String value) {
-            if (!value.matches("https://(canary\\.|ptb\\.|)discord(app)*\\.com/api/webhooks/\\d{18}/(\\w|-|_)*(/?)"))
+            if (!value.matches("https://(canary\\.|ptb\\.|)discord(app)*\\.com/api/webhooks/\\d{18,19}/(\\w|-|_)*(/?)"))
                 return FormValidation.error("Please enter a valid Discord webhook URL.");
             return FormValidation.ok();
         }
