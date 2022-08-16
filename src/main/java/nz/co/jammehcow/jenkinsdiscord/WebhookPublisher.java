@@ -1,5 +1,6 @@
 package nz.co.jammehcow.jenkinsdiscord;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -27,6 +28,7 @@ import java.util.Map;
  * Date: 22/04/17.
  */
 
+@SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "Requires triage")
 public class WebhookPublisher extends Notifier {
     private final String webhookURL;
     private final String branchName;
