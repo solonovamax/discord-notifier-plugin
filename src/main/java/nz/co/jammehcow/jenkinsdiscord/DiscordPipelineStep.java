@@ -12,7 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.inject.Inject;
 import jenkins.model.JenkinsLocationConfiguration;
 
@@ -267,7 +267,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             return "discordSend";
         }
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Send an embed message to Webhook URL";
