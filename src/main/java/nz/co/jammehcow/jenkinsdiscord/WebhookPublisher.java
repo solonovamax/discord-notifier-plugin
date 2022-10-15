@@ -14,6 +14,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import java.util.List;
 import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
 import nz.co.jammehcow.jenkinsdiscord.util.EmbedDescription;
@@ -37,6 +38,7 @@ public class WebhookPublisher extends Notifier {
     private final String notes;
     private final String customAvatarUrl;
     private final String customUsername;
+    private final List<String> fields;
     private final boolean sendOnStateChange;
     private final boolean sendOnlyFailed;
     private boolean enableUrlLinking;
@@ -59,7 +61,10 @@ public class WebhookPublisher extends Notifier {
             String branchName,
             String customAvatarUrl,
             String customUsername,
-            boolean sendOnStateFailed, boolean sendOnlyFailed, boolean enableUrlLinking,
+            List<String> fields,
+            boolean sendOnStateFailed,
+            boolean sendOnlyFailed,
+            boolean enableUrlLinking,
             boolean enableArtifactList,
             boolean enableFooterInfo,
             boolean showChangeset,
@@ -80,6 +85,7 @@ public class WebhookPublisher extends Notifier {
         this.notes = notes;
         this.customAvatarUrl = customAvatarUrl;
         this.customUsername = customUsername;
+        this.fields = fields;
         this.sendLogFile = sendLogFile;
         this.sendStartNotification = sendStartNotification;
         this.scmWebUrl = scmWebUrl;
@@ -103,6 +109,10 @@ public class WebhookPublisher extends Notifier {
 
     public String getCustomUsername() {
         return this.customUsername;
+    }
+
+    public List<String> getFields() {
+        return fields;
     }
 
     public String getNotes() {
@@ -188,6 +198,13 @@ public class WebhookPublisher extends Notifier {
                             + build.getId();
                 }
                 wh.setDescription(new EmbedDescription(build, globalConfig, description, false, false, null).toString());
+
+                // Add all key value field pairs to the webhook by splitting them with the delimiter
+                fields.stream()
+                    .map(s -> s.split(":"))
+                    .forEach(pair -> wh.addField(pair[0], pair[1]));
+
+                // Send the webhook
                 wh.send();
             } catch (WebhookException | InterruptedException | IOException e1) {
                 e1.printStackTrace(listener.getLogger());
@@ -303,6 +320,11 @@ public class WebhookPublisher extends Notifier {
                 new EmbedDescription(build, globalConfig, descriptionPrefix, this.enableArtifactList, this.showChangeset, this.scmWebUrl)
                         .toString()
         );
+
+        // Add all key value field pairs to the webhook by splitting them with the delimiter
+        fields.stream()
+            .map(s -> s.split(":"))
+            .forEach(pair -> wh.addField(pair[0], pair[1]));
         wh.setStatus(statusColor);
 
         if (this.enableFooterInfo)

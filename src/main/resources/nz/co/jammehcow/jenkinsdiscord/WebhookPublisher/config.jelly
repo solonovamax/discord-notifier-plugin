@@ -28,6 +28,10 @@
     <f:entry title="Custom name" field="customUsername">
       <f:textbox />
     </f:entry>
+    <!-- TODO add option to add more textboxes -->
+    <f:entry title="Fields" field="fields">
+      <f:textbox />
+    </f:entry>
     <f:entry title="Enable URL linking" field="enableUrlLinking">
       <f:checkbox />
     </f:entry>

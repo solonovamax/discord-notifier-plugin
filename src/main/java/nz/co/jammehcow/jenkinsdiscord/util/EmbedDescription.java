@@ -21,6 +21,7 @@ public class EmbedDescription {
 
     private LinkedList<String> changesList = new LinkedList<>();
     private LinkedList<String> artifactsList = new LinkedList<>();
+
     private String prefix;
     private String finalDescription;
 
@@ -37,8 +38,8 @@ public class EmbedDescription {
 
         if (showChangeset) {
             ArrayList<Object> changes = new ArrayList<>();
-            List<ChangeLogSet> changeSets = ((RunWithSCM)build).getChangeSets();
-            for (ChangeLogSet i : changeSets)
+            List<ChangeLogSet<?>> changeSets = ((RunWithSCM)build).getChangeSets();
+            for (ChangeLogSet<?> i : changeSets)
                 changes.addAll(Arrays.asList(i.getItems()));
             if (changes.isEmpty()) {
                 this.changesList.add("\n*No changes.*\n");
@@ -86,7 +87,7 @@ public class EmbedDescription {
             this.artifactsList.add("\n**Artifacts:**\n");
             //noinspection unchecked
             List<Run.Artifact> artifacts = build.getArtifacts();
-            if (artifacts.size() == 0) {
+            if (artifacts.isEmpty()) {
                 this.artifactsList.add("\n*No artifacts saved.*");
             } else {
                 for (Run.Artifact artifact : artifacts) {
@@ -118,8 +119,12 @@ public class EmbedDescription {
             description.append(this.prefix);
 
         // Collate the changes and artifacts into the description.
-        for (String changeEntry : this.changesList) description.append(changeEntry);
-        for (String artifact : this.artifactsList) description.append(artifact);
+        for (String changeEntry : this.changesList){
+            description.append(changeEntry);
+        }
+        for (String artifact : this.artifactsList) {
+            description.append(artifact);
+        }
 
         return description.toString().trim();
     }
@@ -131,7 +136,11 @@ public class EmbedDescription {
 
     // https://support.discord.com/hc/en-us/articles/210298617
     private static String EscapeMarkdown(String text) {
-        return text.replace("\\", "\\\\").replace("*", "\\*").replace("_", "\\_").replace("~", "\\~")
+        return text
+            .replace("\\", "\\\\")
+            .replace("*", "\\*")
+            .replace("_", "\\_")
+            .replace("~", "\\~")
             .replace("`", "\\`");
     }
 }
