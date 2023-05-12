@@ -1,23 +1,26 @@
 package nz.co.jammehcow.jenkinsdiscord;
 
+import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.DESCRIPTION_LIMIT;
+import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.FOOTER_LIMIT;
+import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.StatusColor;
+import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.TITLE_LIMIT;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import java.util.List;
+import javax.inject.Inject;
+import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
+import nz.co.jammehcow.jenkinsdiscord.util.EmbedDescription;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-import javax.inject.Inject;
-import jenkins.model.JenkinsLocationConfiguration;
-
-import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.*;
-import nz.co.jammehcow.jenkinsdiscord.util.EmbedDescription;
 
 public class DiscordPipelineStep extends AbstractStepImpl {
     private final String webhookURL;
@@ -32,6 +35,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     private String notes;
     private String customAvatarUrl;
     private String customUsername;
+    private List<String> fields;
     private boolean successful;
     private boolean unstable;
     private boolean enableArtifactsList;
@@ -182,7 +186,17 @@ public class DiscordPipelineStep extends AbstractStepImpl {
         return scmWebUrl;
     }
 
+    @DataBoundSetter
+    public void setFields(List<String> fields) {
+        this.fields = fields;
+    }
+
+    public List<String> getFields() {
+        return fields;
+    }
+
     public static class DiscordPipelineStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
+
         @Inject
         transient DiscordPipelineStep step;
 
@@ -219,8 +233,9 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             if (step.getEnableArtifactsList() || step.getShowChangeset()) {
                 JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
                 Run build = getContext().get(Run.class);
-                wh.setDescription(new EmbedDescription(build, globalConfig, step.getDescription(), step.getEnableArtifactsList(), step.getShowChangeset(), step.getScmWebUrl())
-                        .toString()
+                wh.setDescription(new EmbedDescription(build, globalConfig, step.getDescription(), step.getEnableArtifactsList(), step.getShowChangeset(),
+                    step.getScmWebUrl())
+                    .toString()
                 );
             } else {
                 wh.setDescription(checkLimitAndTruncate("description", step.getDescription(), DESCRIPTION_LIMIT));
@@ -230,15 +245,25 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             wh.setFooter(checkLimitAndTruncate("footer", step.getFooter(), FOOTER_LIMIT));
             wh.setStatus(statusColor);
             wh.setContent(step.getNotes());
-            
-            if (step.getCustomAvatarUrl() != null)
-                wh.setCustomAvatarUrl(step.getCustomAvatarUrl());
-                
-            if (step.getCustomUsername() != null)
-                wh.setCustomUsername(step.getCustomUsername());
 
-            try { wh.send(); }
-            catch (WebhookException e) { e.printStackTrace(listener.getLogger()); }
+            if (step.getCustomAvatarUrl() != null) {
+                wh.setCustomAvatarUrl(step.getCustomAvatarUrl());
+            }
+
+            if (step.getCustomUsername() != null) {
+                wh.setCustomUsername(step.getCustomUsername());
+            }
+
+            // Add all key value field pairs to the webhook by splitting them with the delimiter
+            step.fields.stream()
+                .map(s -> s.split(":"))
+                .forEach(pair -> wh.addField(pair[0], pair[1]));
+
+            try {
+                wh.send();
+            } catch (WebhookException e) {
+                e.printStackTrace(listener.getLogger());
+            }
 
             return null;
         }
