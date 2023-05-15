@@ -140,7 +140,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     public String getNotes() {
         return notes;
     }
-    
+
     @DataBoundSetter
     public void setCustomAvatarUrl(String customAvatarUrl) {
         this.customAvatarUrl = customAvatarUrl;
@@ -149,7 +149,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     public String getCustomAvatarUrl() {
         return customAvatarUrl;
     }
-    
+
     @DataBoundSetter
     public void setCustomUsername(String customUsername) {
         this.customUsername = customUsername;
@@ -201,7 +201,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
         transient DiscordPipelineStep step;
 
         @StepContextParameter
-        private transient TaskListener listener;
+        transient TaskListener listener;
 
         @Override
         protected Void run() throws Exception {
@@ -233,9 +233,14 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             if (step.getEnableArtifactsList() || step.getShowChangeset()) {
                 JenkinsLocationConfiguration globalConfig = JenkinsLocationConfiguration.get();
                 Run build = getContext().get(Run.class);
-                wh.setDescription(new EmbedDescription(build, globalConfig, step.getDescription(), step.getEnableArtifactsList(), step.getShowChangeset(),
-                    step.getScmWebUrl())
-                    .toString()
+                wh.setDescription(new EmbedDescription(
+                                build,
+                                globalConfig,
+                                step.getDescription(),
+                                step.getEnableArtifactsList(),
+                                step.getShowChangeset(),
+                                step.getScmWebUrl()
+                        ).toString()
                 );
             } else {
                 wh.setDescription(checkLimitAndTruncate("description", step.getDescription(), DESCRIPTION_LIMIT));
@@ -255,9 +260,11 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             }
 
             // Add all key value field pairs to the webhook by splitting them with the delimiter
-            step.fields.stream()
-                .map(s -> s.split(":"))
-                .forEach(pair -> wh.addField(pair[0], pair[1]));
+            if (step.fields != null) {
+                step.fields.stream()
+                    .map(s -> s.split(":"))
+                    .forEach(pair -> wh.addField(pair[0], pair[1]));
+            }
 
             try {
                 wh.send();
