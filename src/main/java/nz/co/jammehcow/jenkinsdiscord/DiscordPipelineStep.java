@@ -10,6 +10,8 @@ import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Inject;
 import jenkins.model.JenkinsLocationConfiguration;
@@ -187,12 +189,24 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setFields(List<String> fields) {
-        this.fields = fields;
+    public void setFields(String fieldsString) {
+        // Could be optimized using >8 Java Features
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list, fieldsString.split(", "));
+        this.fields = list;
     }
 
-    public List<String> getFields() {
-        return fields;
+    public String getFields() {
+        // Could be optimized using >8 Java Features
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < fields.size(); i++) {
+            String s = fields.get(i);
+            builder.append(s);
+            if(i + 1 < fields.size()){
+                builder.append(", ");
+            }
+        }
+        return builder.toString();
     }
 
     public static class DiscordPipelineStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {

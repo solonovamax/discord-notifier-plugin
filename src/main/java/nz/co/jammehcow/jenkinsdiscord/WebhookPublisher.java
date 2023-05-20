@@ -14,11 +14,15 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
 import nz.co.jammehcow.jenkinsdiscord.util.EmbedDescription;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import java.io.IOException;
@@ -38,7 +42,7 @@ public class WebhookPublisher extends Notifier {
     private final String notes;
     private final String customAvatarUrl;
     private final String customUsername;
-    private final List<String> fields;
+    private List<String> fields;
     private final boolean sendOnStateChange;
     private final boolean sendOnlyFailed;
     private boolean enableUrlLinking;
@@ -61,7 +65,6 @@ public class WebhookPublisher extends Notifier {
             String branchName,
             String customAvatarUrl,
             String customUsername,
-            List<String> fields,
             boolean sendOnStateFailed,
             boolean sendOnlyFailed,
             boolean enableUrlLinking,
@@ -85,7 +88,6 @@ public class WebhookPublisher extends Notifier {
         this.notes = notes;
         this.customAvatarUrl = customAvatarUrl;
         this.customUsername = customUsername;
-        this.fields = fields;
         this.sendLogFile = sendLogFile;
         this.sendStartNotification = sendStartNotification;
         this.scmWebUrl = scmWebUrl;
@@ -111,8 +113,25 @@ public class WebhookPublisher extends Notifier {
         return this.customUsername;
     }
 
-    public List<String> getFields() {
-        return fields;
+    @DataBoundSetter
+    public void setFields(String fieldsString) {
+        // Could be optimized using >8 Java Features
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list, fieldsString.split(", "));
+        this.fields = list;
+    }
+
+    public String getFields() {
+        // Could be optimized using >8 Java Features
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < fields.size(); i++) {
+            String s = fields.get(i);
+            builder.append(s);
+            if(i + 1 < fields.size()){
+                builder.append(", ");
+            }
+        }
+        return builder.toString();
     }
 
     public String getNotes() {
@@ -199,10 +218,7 @@ public class WebhookPublisher extends Notifier {
                 }
                 wh.setDescription(new EmbedDescription(build, globalConfig, description, false, false, null).toString());
 
-                // Add all key value field pairs to the webhook by splitting them with the delimiter
-                fields.stream()
-                    .map(s -> s.split(":"))
-                    .forEach(pair -> wh.addField(pair[0], pair[1]));
+                splitAndAddFields(fields, wh, listener);
 
                 // Send the webhook
                 wh.send();
@@ -321,10 +337,7 @@ public class WebhookPublisher extends Notifier {
                         .toString()
         );
 
-        // Add all key value field pairs to the webhook by splitting them with the delimiter
-        fields.stream()
-            .map(s -> s.split(":"))
-            .forEach(pair -> wh.addField(pair[0], pair[1]));
+        splitAndAddFields(fields, wh, listener);
         wh.setStatus(statusColor);
 
         if (this.enableFooterInfo)
@@ -338,6 +351,29 @@ public class WebhookPublisher extends Notifier {
         }
 
         return true;
+    }
+
+    /**
+     * Add all key value field pairs to the webhook by splitting them with the delimiter
+    */
+    private void splitAndAddFields(List<String> fields, DiscordWebhook wh, BuildListener listener){
+        // Early exit if we don't have any fields set
+        if(fields == null){
+            return;
+        }
+        // Go through all fields delivered and split them accordingly
+        fields.stream()
+          // Filter out invalid Strings
+          .filter(s -> s.contains(":"))
+          .map(s -> s.split(":"))
+          // Filter out invalid Strings
+          .filter(s -> {
+              if(s.length <= 1){
+                  listener.getLogger().printf("Pair %s contains invalid values%n", Arrays.toString(s));
+              }
+              return s.length > 1;
+          })
+          .forEach(pair -> wh.addField(pair[0], pair[1]));
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
