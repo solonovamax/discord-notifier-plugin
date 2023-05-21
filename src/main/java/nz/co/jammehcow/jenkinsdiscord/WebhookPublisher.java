@@ -14,15 +14,14 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
-import java.util.List;
+import java.io.IOException;
+import java.util.Map;
 import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
 import nz.co.jammehcow.jenkinsdiscord.util.EmbedDescription;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * Author: jammehcow.
@@ -38,7 +37,7 @@ public class WebhookPublisher extends Notifier {
     private final String notes;
     private final String customAvatarUrl;
     private final String customUsername;
-    private final List<String> fields;
+    private DynamicFieldContainer dynamicFieldContainer;
     private final boolean sendOnStateChange;
     private final boolean sendOnlyFailed;
     private boolean enableUrlLinking;
@@ -61,7 +60,6 @@ public class WebhookPublisher extends Notifier {
             String branchName,
             String customAvatarUrl,
             String customUsername,
-            List<String> fields,
             boolean sendOnStateFailed,
             boolean sendOnlyFailed,
             boolean enableUrlLinking,
@@ -85,7 +83,6 @@ public class WebhookPublisher extends Notifier {
         this.notes = notes;
         this.customAvatarUrl = customAvatarUrl;
         this.customUsername = customUsername;
-        this.fields = fields;
         this.sendLogFile = sendLogFile;
         this.sendStartNotification = sendStartNotification;
         this.scmWebUrl = scmWebUrl;
@@ -111,8 +108,16 @@ public class WebhookPublisher extends Notifier {
         return this.customUsername;
     }
 
-    public List<String> getFields() {
-        return fields;
+    @DataBoundSetter
+    public void setDynamicFieldContainer(String fieldsString) {
+      this.dynamicFieldContainer = DynamicFieldContainer.of(fieldsString);
+    }
+
+    public String getDynamicFieldContainer() {
+        if(dynamicFieldContainer == null){
+            return "";
+        }
+        return dynamicFieldContainer.toString();
     }
 
     public String getNotes() {
@@ -199,10 +204,7 @@ public class WebhookPublisher extends Notifier {
                 }
                 wh.setDescription(new EmbedDescription(build, globalConfig, description, false, false, null).toString());
 
-                // Add all key value field pairs to the webhook by splitting them with the delimiter
-                fields.stream()
-                    .map(s -> s.split(":"))
-                    .forEach(pair -> wh.addField(pair[0], pair[1]));
+                addDynamicFieldsToWebhook(dynamicFieldContainer, wh);
 
                 // Send the webhook
                 wh.send();
@@ -321,10 +323,7 @@ public class WebhookPublisher extends Notifier {
                         .toString()
         );
 
-        // Add all key value field pairs to the webhook by splitting them with the delimiter
-        fields.stream()
-            .map(s -> s.split(":"))
-            .forEach(pair -> wh.addField(pair[0], pair[1]));
+        addDynamicFieldsToWebhook(dynamicFieldContainer, wh);
         wh.setStatus(statusColor);
 
         if (this.enableFooterInfo)
@@ -338,6 +337,18 @@ public class WebhookPublisher extends Notifier {
         }
 
         return true;
+    }
+
+    /**
+     * Add all key value field pairs to the webhook
+    */
+    private void addDynamicFieldsToWebhook(DynamicFieldContainer dynamicFieldContainer, DiscordWebhook wh){
+        // Early exit if we don't have any dynamicFieldContainer set
+        if(dynamicFieldContainer == null){
+            return;
+        }
+        // Go through all fields and add them to the webhook
+        dynamicFieldContainer.getFields().forEach(pair -> wh.addField(pair.getKey(), pair.getValue()));
     }
 
     public BuildStepMonitor getRequiredMonitorService() {

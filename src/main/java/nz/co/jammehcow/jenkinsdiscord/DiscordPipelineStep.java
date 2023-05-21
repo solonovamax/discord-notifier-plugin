@@ -10,7 +10,6 @@ import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import java.util.List;
 import javax.inject.Inject;
 import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
@@ -35,7 +34,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     private String notes;
     private String customAvatarUrl;
     private String customUsername;
-    private List<String> fields;
+    private DynamicFieldContainer dynamicFieldContainer;
     private boolean successful;
     private boolean unstable;
     private boolean enableArtifactsList;
@@ -187,12 +186,15 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setFields(List<String> fields) {
-        this.fields = fields;
+    public void setDynamicFieldContainer(String fieldsString) {
+        this.dynamicFieldContainer = DynamicFieldContainer.of(fieldsString);
     }
 
-    public List<String> getFields() {
-        return fields;
+    public String getDynamicFieldContainer() {
+        if(dynamicFieldContainer == null){
+            return "";
+        }
+        return dynamicFieldContainer.toString();
     }
 
     public static class DiscordPipelineStepExecution extends AbstractSynchronousNonBlockingStepExecution<Void> {
@@ -259,12 +261,8 @@ public class DiscordPipelineStep extends AbstractStepImpl {
                 wh.setCustomUsername(step.getCustomUsername());
             }
 
-            // Add all key value field pairs to the webhook by splitting them with the delimiter
-            if (step.fields != null) {
-                step.fields.stream()
-                    .map(s -> s.split(":"))
-                    .forEach(pair -> wh.addField(pair[0], pair[1]));
-            }
+            // Add all key value field pairs to the webhook
+            addDynamicFieldsToWebhook(wh);
 
             try {
                 wh.send();
@@ -273,6 +271,18 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             }
 
             return null;
+        }
+
+        /**
+         * Add all key value field pairs to the webhook
+         */
+        private void addDynamicFieldsToWebhook(DiscordWebhook wh){
+            // Early exit if we don't have any dynamicFieldContainer set
+            if(step.dynamicFieldContainer == null){
+                return;
+            }
+            // Go through all fields and add them to the webhook
+            step.dynamicFieldContainer.getFields().forEach(pair -> wh.addField(pair.getKey(), pair.getValue()));
         }
 
         private String checkLimitAndTruncate(String fieldName, String value, int limit) {
