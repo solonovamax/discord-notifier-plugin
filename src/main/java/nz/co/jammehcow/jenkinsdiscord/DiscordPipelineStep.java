@@ -191,6 +191,9 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     }
 
     public String getDynamicFieldContainer() {
+        if(dynamicFieldContainer == null){
+            return "";
+        }
         return dynamicFieldContainer.toString();
     }
 
