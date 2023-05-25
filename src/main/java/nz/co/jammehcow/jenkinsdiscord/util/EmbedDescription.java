@@ -91,7 +91,7 @@ public class EmbedDescription {
                 this.artifactsList.add("\n*No artifacts saved.*");
             } else {
                 for (Run.Artifact artifact : artifacts) {
-                    this.artifactsList.add(" - " + artifactsURL + artifact.getHref() + "\n");
+                    this.artifactsList.add("- " + artifactsURL + artifact.getHref() + "\n");
                 }
             }
         }
