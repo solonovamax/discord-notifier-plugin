@@ -73,10 +73,10 @@ public class EmbedDescription {
 
                     if (withLinks) {
                         String url = String.format(scmWebUrl, commitID);
-                        this.changesList.add(String.format("   - [`%s`](%s) *%s - %s*%n",
+                        this.changesList.add(String.format("- [`%s`](%s) *%s - %s*%n",
                                 commitDisplayStr, url, msg, author));
                     } else {
-                        this.changesList.add(String.format("   - `%s` *%s - %s*%n",
+                        this.changesList.add(String.format("- `%s` *%s - %s*%n",
                                 commitDisplayStr, msg, author));
                     }
                 }
