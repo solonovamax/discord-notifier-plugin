@@ -33,4 +33,13 @@
   <f:entry title="SCM Web URL" field="scmWebUrl">
     <f:textbox />
   </f:entry>
+  <f:entry title="Custom Avatar URL" field="customAvatarUrl">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="Custom Username" field="customUsername">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="Custom File" field="customFile">
+    <f:textbox />
+  </f:entry>
 </j:jelly>
