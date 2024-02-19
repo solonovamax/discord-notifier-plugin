@@ -204,7 +204,7 @@ public class WebhookPublisher extends Notifier {
                 }
                 wh.setDescription(new EmbedDescription(build, globalConfig, description, false, false, null).toString());
 
-                addDynamicFieldsToWebhook(dynamicFieldContainer, wh);
+                addDynamicFieldsToWebhook(dynamicFieldContainer, wh, env);
 
                 // Send the webhook
                 wh.send();
@@ -323,7 +323,7 @@ public class WebhookPublisher extends Notifier {
                         .toString()
         );
 
-        addDynamicFieldsToWebhook(dynamicFieldContainer, wh);
+        addDynamicFieldsToWebhook(dynamicFieldContainer, wh, env);
         wh.setStatus(statusColor);
 
         if (this.enableFooterInfo)
@@ -342,13 +342,13 @@ public class WebhookPublisher extends Notifier {
     /**
      * Add all key value field pairs to the webhook
     */
-    private void addDynamicFieldsToWebhook(DynamicFieldContainer dynamicFieldContainer, DiscordWebhook wh){
+    private void addDynamicFieldsToWebhook(DynamicFieldContainer dynamicFieldContainer, DiscordWebhook wh, EnvVars env){
         // Early exit if we don't have any dynamicFieldContainer set
         if(dynamicFieldContainer == null){
             return;
         }
         // Go through all fields and add them to the webhook
-        dynamicFieldContainer.getFields().forEach(pair -> wh.addField(pair.getKey(), pair.getValue()));
+        dynamicFieldContainer.getFields().forEach(pair -> wh.addField(pair.getKey() + ":", env.expand(pair.getValue())));
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
