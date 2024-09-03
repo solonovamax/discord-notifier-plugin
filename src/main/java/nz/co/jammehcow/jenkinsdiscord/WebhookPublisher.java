@@ -1,9 +1,12 @@
 package nz.co.jammehcow.jenkinsdiscord;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Plugin;
+import hudson.PluginWrapper;
 import hudson.matrix.MatrixConfiguration;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -17,6 +20,8 @@ import hudson.util.FormValidation;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+
+import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
 import nz.co.jammehcow.jenkinsdiscord.util.EmbedDescription;
@@ -48,7 +53,7 @@ public class WebhookPublisher extends Notifier {
     private boolean sendLogFile;
     private boolean sendStartNotification;
     private static final String NAME = "Discord Notifier";
-    private static final String VERSION = "1.4.11";
+    private static final String SHORT_NAME = "discord-notifier";
     private final String scmWebUrl;
 
     @DataBoundConstructor
@@ -328,7 +333,7 @@ public class WebhookPublisher extends Notifier {
         wh.setStatus(statusColor);
 
         if (this.enableFooterInfo)
-            wh.setFooter("Jenkins v" + build.getHudsonVersion() + ", " + getDescriptor().getDisplayName() + " v" + getDescriptor().getVersion());
+            wh.setFooter("Jenkins v" + build.getHudsonVersion() + ", " + getDescriptor().getDisplayName() + " v" + getDescriptor().getPluginVersion());
 
         try {
             listener.getLogger().println("Sending notification to Discord.");
@@ -367,18 +372,29 @@ public class WebhookPublisher extends Notifier {
             return true;
         }
 
+        final Plugin p = Jenkins.get().getPlugin(SHORT_NAME);
+
         public FormValidation doCheckWebhookURL(@QueryParameter String value) {
             if (!value.matches("https://(canary\\.|ptb\\.|)discord(app)*\\.com/api/webhooks/\\d{18,19}/(\\w|-|_)*(/?)"))
                 return FormValidation.error("Please enter a valid Discord webhook URL.");
             return FormValidation.ok();
         }
 
+        @NonNull
         public String getDisplayName() {
-            return NAME;
+            if (p == null) {
+                return NAME;
+            } else {
+                return p.getWrapper().getDisplayName();
+            }
         }
 
-        public String getVersion() {
-            return VERSION;
+        public String getPluginVersion() {
+            if (p == null) {
+                return "";
+            } else {
+                return p.getWrapper().getVersion();
+            }
         }
     }
 
