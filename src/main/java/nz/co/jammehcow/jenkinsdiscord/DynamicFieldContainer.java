@@ -46,7 +46,7 @@ public class DynamicFieldContainer {
     DynamicFieldContainer fieldContainer = new DynamicFieldContainer();
 
     try {
-      for (String s : fieldsString.split(", ")) {
+      for (String s : fieldsString.split(",\\s*")) {
         String[] pair = s.split(":", 2);
         fieldContainer.addField(pair[0], pair[1]);
       }
