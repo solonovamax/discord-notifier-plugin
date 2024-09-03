@@ -296,6 +296,9 @@ public class DiscordPipelineStep extends AbstractStepImpl {
 
         private InputStream getFileInputStream(String file) throws IOException, InterruptedException {
             FilePath ws = getContext().get(FilePath.class);
+            if (ws == null) {
+                throw new IllegalStateException("Could not acquire FilePath");
+            }
             final FilePath fp = ws.child(file);
             if (fp.exists()) {
                 try {
