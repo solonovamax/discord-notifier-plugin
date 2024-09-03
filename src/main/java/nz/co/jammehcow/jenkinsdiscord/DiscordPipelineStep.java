@@ -7,6 +7,7 @@ import static nz.co.jammehcow.jenkinsdiscord.DiscordWebhook.TITLE_LIMIT;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -21,6 +22,11 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.file.InvalidPathException;
 public class DiscordPipelineStep extends AbstractStepImpl {
     private final String webhookURL;
 
@@ -34,6 +40,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     private String notes;
     private String customAvatarUrl;
     private String customUsername;
+    private String customFile;
     private DynamicFieldContainer dynamicFieldContainer;
     private boolean successful;
     private boolean unstable;
@@ -159,6 +166,15 @@ public class DiscordPipelineStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setCustomFile(String customFile) {
+        this.customFile = customFile;
+    }
+
+    public String getCustomFile() {
+        return customFile;
+    }
+
+    @DataBoundSetter
     public void setEnableArtifactsList(boolean enable) {
         this.enableArtifactsList = enable;
     }
@@ -261,6 +277,11 @@ public class DiscordPipelineStep extends AbstractStepImpl {
                 wh.setCustomUsername(step.getCustomUsername());
             }
 
+            if (step.getCustomFile() != null) {
+                InputStream fis = getFileInputStream(step.getCustomFile());
+                wh.setFile(fis, step.getCustomFile());
+            }
+
             // Add all key value field pairs to the webhook
             addDynamicFieldsToWebhook(wh);
 
@@ -271,6 +292,21 @@ public class DiscordPipelineStep extends AbstractStepImpl {
             }
 
             return null;
+        }
+
+        private InputStream getFileInputStream(String file) throws IOException, InterruptedException {
+            FilePath ws = getContext().get(FilePath.class);
+            final FilePath fp = ws.child(file);
+            if (fp.exists()) {
+                try {
+                    return fp.read();
+                } catch (InvalidPathException var3) {
+                    throw new IOException(var3);
+                }
+            } else {
+                String message = "No such file: " + file;
+                return new ByteArrayInputStream(message.getBytes(Charset.defaultCharset()));
+            }
         }
 
         /**
