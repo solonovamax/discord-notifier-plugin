@@ -78,23 +78,21 @@ class DiscordWebhook {
     }
 
     public DiscordWebhook setCustomUsername(String username) {
-        if (username != null && !username.equals(""))
+        if (username != null && !username.isEmpty())
             this.obj.put("username", username);
-        else
-        {
+        else {
             // unset will allow default discord username to be used (as specified in discord's integration settings)
-            this.obj.remove("username"); 
+            this.obj.remove("username");
         }
         return this;
     }
 
     public DiscordWebhook setCustomAvatarUrl(String url) {
-        if (url != null && !url.equals(""))
+        if (url != null && !url.isEmpty())
             this.obj.put("avatar_url", url);
-        else
-        {
+        else {
             // unset will allow default avatar to be used (as specified in discord's integration settings)
-            this.obj.remove("avatar_url"); 
+            this.obj.remove("avatar_url");
         }
         return this;
     }
@@ -139,6 +137,7 @@ class DiscordWebhook {
 
     /**
      * Sets the URL of image at the bottom of embed.
+     *
      * @param url URL of image
      * @return this
      */
@@ -151,6 +150,7 @@ class DiscordWebhook {
 
     /**
      * Sets the URL of image on the right side.
+     *
      * @param url URL of image
      * @return this
      */
@@ -192,7 +192,6 @@ class DiscordWebhook {
      * @throws WebhookException the webhook exception
      */
     public void send() throws WebhookException {
-    	
         this.embed.put("fields", fields);
         if (this.embed.toString().length() > 6000)
             throw new WebhookException("Embed object larger than the limit (" + this.embed.toString().length() + ">6000).");
@@ -223,6 +222,8 @@ class DiscordWebhook {
             if (response.getStatus() < 200 || response.getStatus() >= 300) {
                 throw new WebhookException(response.getBody().getObject().toString(2));
             }
-        } catch (UnirestException e) { e.printStackTrace(); }
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
     }
 }

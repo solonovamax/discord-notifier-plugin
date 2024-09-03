@@ -3,13 +3,15 @@ package nz.co.jammehcow.jenkinsdiscord.util;
 import jenkins.scm.RunWithSCM;
 import hudson.model.Run;
 import hudson.scm.ChangeLogSet;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.IllegalFormatException;
+
 import jenkins.model.JenkinsLocationConfiguration;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -38,7 +40,7 @@ public class EmbedDescription {
 
         if (showChangeset) {
             ArrayList<Object> changes = new ArrayList<>();
-            List<ChangeLogSet<?>> changeSets = ((RunWithSCM)build).getChangeSets();
+            List<ChangeLogSet<?>> changeSets = ((RunWithSCM) build).getChangeSets();
             for (ChangeLogSet<?> i : changeSets)
                 changes.addAll(Arrays.asList(i.getItems()));
             if (changes.isEmpty()) {
@@ -67,7 +69,7 @@ public class EmbedDescription {
                     int nl = msg.indexOf("\n");
                     if (nl >= 0)
                         msg = msg.substring(0, nl).trim();
-                    msg = EscapeMarkdown(msg);
+                    msg = escapeMarkdown(msg);
 
                     String author = entry.getAuthor().getFullName();
 
@@ -119,7 +121,7 @@ public class EmbedDescription {
             description.append(this.prefix);
 
         // Collate the changes and artifacts into the description.
-        for (String changeEntry : this.changesList){
+        for (String changeEntry : this.changesList) {
             description.append(changeEntry);
         }
         for (String artifact : this.artifactsList) {
@@ -135,12 +137,12 @@ public class EmbedDescription {
     }
 
     // https://support.discord.com/hc/en-us/articles/210298617
-    private static String EscapeMarkdown(String text) {
+    private static String escapeMarkdown(String text) {
         return text
-            .replace("\\", "\\\\")
-            .replace("*", "\\*")
-            .replace("_", "\\_")
-            .replace("~", "\\~")
-            .replace("`", "\\`");
+                .replace("\\", "\\\\")
+                .replace("*", "\\*")
+                .replace("_", "\\_")
+                .replace("~", "\\~")
+                .replace("`", "\\`");
     }
 }

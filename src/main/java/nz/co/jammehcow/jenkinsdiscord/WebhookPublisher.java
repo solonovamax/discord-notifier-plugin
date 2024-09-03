@@ -15,6 +15,7 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.util.FormValidation;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import jenkins.model.JenkinsLocationConfiguration;
 import nz.co.jammehcow.jenkinsdiscord.exception.WebhookException;
@@ -294,18 +295,18 @@ public class WebhookPublisher extends Notifier {
                     + "**Build:** "
                     + getMarkdownHyperlink(build.getId(), url)
                     + "\n**Status:** "
-                    + getMarkdownHyperlink(build.getResult().toString().toLowerCase(), url) + "\n";
+                    + getMarkdownHyperlink(build.getResult().toString().toLowerCase(Locale.ENGLISH), url) + "\n";
             wh.setURL(url);
         } else {
             descriptionPrefix = branchNameString
                     + "**Build:** "
                     + build.getId()
                     + "\n**Status:** "
-                    + build.getResult().toString().toLowerCase() + "\n";
+                    + build.getResult().toString().toLowerCase(Locale.ENGLISH) + "\n";
         }
         descriptionPrefix += combinationString;
 
-        if (notes != null && notes.length() > 0) {
+        if (notes != null && !notes.isEmpty()) {
             wh.setContent(env.expand(notes));
         }
 
