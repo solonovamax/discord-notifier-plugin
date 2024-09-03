@@ -3,6 +3,7 @@ package nz.co.jammehcow.jenkinsdiscord;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * @author Marek Hasselder
@@ -49,8 +50,8 @@ public class DynamicFieldContainer {
         String[] pair = s.split(":");
         fieldContainer.addField(pair[0], pair[1]);
       }
-    } catch (Exception e) {
-      throw new RuntimeException("Dynamic fields string is in a wrong format. Using empty container as fallback");
+    } catch (PatternSyntaxException e) {
+      throw new RuntimeException("Dynamic fields string is in a wrong format. Using empty container as fallback", e);
     }
 
     return fieldContainer;
