@@ -225,7 +225,7 @@ public class DiscordPipelineStep extends AbstractStepImpl {
 
     public static class DiscordPipelineStepExecution extends SynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
-        private final DiscordPipelineStep step;
+        private final transient DiscordPipelineStep step;
 
         protected DiscordPipelineStepExecution(DiscordPipelineStep step, StepContext context) {
             super(context);
