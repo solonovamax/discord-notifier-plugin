@@ -259,7 +259,7 @@ public class EmbedUtil {
         List<String> artifactList = new ArrayList<>();
 
         for (Run.Artifact artifact : artifacts)
-            artifactList.add(String.format("- [%s](%s)", null, artifactsURL + artifact.getHref()));
+            artifactList.add(String.format("- [%s](%s)", artifact.getFileName(), artifactsURL + artifact.getHref()));
 
         return artifactList;
     }
